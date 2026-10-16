@@ -1,5 +1,5 @@
 from operator import contains
-from trafilanews.utils import decode_rss_links, parse_rss_feed, parse_article, fetch_article 
+from src.StalkNews.utils import decode_rss_links, parse_rss_feed, parse_article, fetch_article 
 import httpx
 from collections.abc import Generator, Iterator
 
