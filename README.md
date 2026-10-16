@@ -1,3 +1,8 @@
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/AlbinTouma/newsdeliver/main/assets/Banner.jpg" alt="Newsdeliver jpg">
+</p>
+
 # Newsdeliver 
 
 Newsdeliver is a Python package that can scrape RSS feeds inlcuding Google News feed. 
