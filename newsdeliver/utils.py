@@ -1,5 +1,5 @@
 import feedparser
-from googlenewsdecoder import gnewsdecoder
+from googlenewsdecoder import gnewsdecoder 
 from io import BytesIO
 from typing import List
 from trafilatura import extract 

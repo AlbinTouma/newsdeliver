@@ -1,7 +1,7 @@
 [project]
-name = "StalkNews"
+name = "newsdeliver"
 version = "0.1.0"
-description = "StalkNews helps researchers stream news articles from RSS feeds including Google news. The library builds on Trafilatura, feedparser, and google news decoder."
+description = "newsdeliver helps researchers stream news articles from RSS feeds including Google news. The library builds on Trafilatura, feedparser, and google news decoder."
 authors = [
     {name = "Albin Touma",email = "albin.touma@gmail.com"}
 ]

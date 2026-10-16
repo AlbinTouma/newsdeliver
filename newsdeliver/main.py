@@ -1,6 +1,6 @@
 from collections.abc import Generator, Iterator
 import httpx
-from src.StalkNews.ingestfeed import IngestFeed
+from newsdeliver.ingestfeed import IngestFeed
 
 class StreamRSS:
     def __init__(self, url: str | list[str], client: httpx.Client, browser: object | None = None):

@@ -1,5 +1,5 @@
 from operator import contains
-from src.StalkNews.utils import decode_rss_links, parse_rss_feed, parse_article, fetch_article 
+from newsdeliver.utils import decode_rss_links, parse_rss_feed, parse_article, fetch_article 
 import httpx
 from collections.abc import Generator, Iterator
 
@@ -53,7 +53,7 @@ if __name__ =="__main__":
     google_rss_url ="https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=Iran"
     bbc_rss_url = "https://feeds.bbci.co.uk/news/rss.xml"
 
-    rss = trafilanews(google_rss_url, use_playwright=True)
+    rss = IngestFeed(google_rss_url, httpx.Client())
     feed = rss.stream_articles()
     for i in feed:
         print(i)
