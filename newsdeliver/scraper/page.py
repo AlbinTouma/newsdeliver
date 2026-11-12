@@ -1,10 +1,7 @@
-import feedparser
-from googlenewsdecoder import gnewsdecoder 
-from io import BytesIO
-from typing import List
-from trafilatura import extract 
-from collections.abc import Generator, Iterator 
-
+import httpx
+from trafilatura import extract
+import json
+from playwright.sync_api import sync_playwright
 
 def fetch_with_browser(url, browser) -> str | None:
     """Fetches the article content from the given URL using Playwright.
@@ -28,45 +25,18 @@ def fetch_with_browser(url, browser) -> str | None:
 def fetch_article(url, client, browser) -> str | None:
     """Fetches the article content from the given URL using either httpx or Playwright.
     If the httpx request fails, it will attempt to fetch the content using Playwright unless Playwright is unavailable."""
+    response = None
     try:
         response = client.get(url)
         if response.status_code == 200:
             return response.text
         elif browser:
             return fetch_with_browser(url, browser)
-        return None 
+        return response 
     except Exception as e:
-        pass
+        print("Exception request", e)
+        print(response.status_code)
 
-
-def decode_rss_links(url) -> str:
-        """Decodes urls from Google RSS feed. Returns decoded url if successful, otherwise returns the original url.
-        params:
-            url: str - The url to decode
-        returns:
-            str - The decoded url or the original url if decoding fails
-        """
-        decoded = gnewsdecoder(url)
-        if decoded['decoded_url']:
-            return decoded['decoded_url']
-
-        return url
-
-def parse_rss_feed(response) -> Generator[str, None, None]:
-        """
-                Parses the RSS feed and yields the links of the articles.
-                params:
-                    response: httpx.Response - The response object from the RSS feed request
-                yields:
-                    str - The link of each article in the RSS feed
-        """
-        try:
-            feed= feedparser.parse(BytesIO(response.content))
-            for item in feed['entries']:
-                yield item['link']
-
-        except Exception as e:
-            raise Exception("Error", e)
 
 def parse_article(html_content: str) -> str | None:
         """
@@ -81,4 +51,25 @@ def parse_article(html_content: str) -> str | None:
 
         return extract(html_content, output_format="json", with_metadata=True)
 
+
+def scrape_article_worker(url: str) -> None:
+    """Worker fetches and parses an article, and returns the extracted text in JSON format.
+    params:
+        url: str - The url of the article
+    returns:
+        None
+    """
+    try:
+        with httpx.Client() as client:
+            html_content = fetch_article(url, client, None)
+            if html_content:
+                parsed_article = parse_article(html_content)
+                article = json.loads(parsed_article).get('title')
+                return article
+            else:
+                print(f"Failed to fetch article from {url}")
+                return None
+    except Exception as e:
+        print(f"Error processing article {url}: {e}")
+        print(e)
 

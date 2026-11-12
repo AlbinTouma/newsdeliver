@@ -2,18 +2,11 @@
 name = "newsdeliver"
 version = "0.1.0"
 description = "newsdeliver helps researchers stream news articles from RSS feeds including Google news. The library builds on Trafilatura, feedparser, and google news decoder."
+requires-python=">=3.11, <3.16"
 authors = [
     {name = "Albin Touma",email = "albin.touma@gmail.com"}
 ]
-readme = "README.md"
-requires-python = ">=3.11"
-dependencies = [
-    "googlenewsdecoder (>=0.1.7,<0.2.0)",
-    "feedparser (>=6.0.14,<7.0.0)",
-    "trafilatura (>=2.2.0,<3.0.0)",
-    "httpx[http2] (>=0.28.1,<0.29.0)",
-    "playwright (>=1.63.0,<2.0.0)",
-]
+dependencies = ["googlenewsdecoder (==0.2.2)", "feedparser (>=6.0.14,<7.0.0)", "trafilatura (>=2.3.1,<3.0.0)", "playwright (>=1.65.0,<2.0.0)"]
 
 [project.optional-dependencies]
 playwright = [
@@ -28,6 +21,14 @@ dev = [
 ]
 
 
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry]
+name = "newsdeliver"
+authors = ["Albin Touma"]
+description = "newsdeliver helps researchers build a corpus of news articles"
+version = "0.0.1"
