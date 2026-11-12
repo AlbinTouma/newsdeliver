@@ -4,7 +4,9 @@ from io import BytesIO
 import feedparser
 import httpx
 from collections.abc import Generator
-from googlenewsdecoder import gnewsdecoder
+from googlenewsdecoder import gnews_decoder_async
+import asyncio
+
 
 async def get_feed(client, url):
     """Make a httpx call to rss feed and return response.content"""
@@ -30,16 +32,30 @@ def parse_rss_feed(response) -> list[str]:
             raise Exception("Error", e)
 
 
+def stream_parse_rss_feed(response) -> Generator[str, None, None]:
+        """
+                Parses the RSS feed and yields the links of the articles.
+                params:
+                    response: httpx.Response - The response object from the RSS feed request
+                yields:
+                    str - The link of each article in the RSS feed
+        """
+        try:
+            feed= feedparser.parse(BytesIO(response.content))
+            for item in feed['entries']:
+                yield item['link']
+        except Exception as e:
+            raise Exception("Error", e)
 
 
-def decode_rss_links(url) -> str:
+async def decode_rss_links(url) -> str:
         """Decodes urls from Google RSS feed. Returns decoded url if successful, otherwise returns the original url.
         params:
             url: str - The url to decode
         returns:
             str - The decoded url or the original url if decoding fails
         """
-        decoded = gnewsdecoder(url)
+        decoded = await gnews_decoder_async(url)
         if decoded['decoded_url']:
             return decoded['decoded_url']
 
@@ -47,7 +63,7 @@ def decode_rss_links(url) -> str:
 
 
 
-def rss_worker(client, url: str) -> list[str] | None:
+async def rss_worker_async(client, url: str) -> list[str] | None:
     """Worker fetches and parses an rss feed, and returns article urls.
     params:
         url: str - The url of the rss feed
@@ -55,12 +71,12 @@ def rss_worker(client, url: str) -> list[str] | None:
         list[str] - A list of links for each article in the RSS feed
     """
     try:
-        response = client.get(url)
-        rss_feed = parse_rss_feed(response)
+        response = await client.get(url)
+        print(response)
+        rss_feed = await asyncio.to_thread(parse_rss_feed, response)
         
         if url.startswith("https://news.google.com/rss"):
-            gnews_results: list[dict] = [gnewsdecoder(url) for url in rss_feed]
-            decoded_urls: list[sr] = [i['decoded_url'] for i in gnews_results if i["status"] == True]
+            decoded_url = await decode_rss_links(rss_feed)
             return decoded_urls
 
 
