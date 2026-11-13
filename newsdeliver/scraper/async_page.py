@@ -4,7 +4,7 @@ import json
 from playwright.async_api  import async_playwright
 import asyncio
 
-async def fetch_with_browser(url, browser) -> str | None:
+async def fetch_with_browser(url, context) -> str | None:
     """Fetches the article content from the given URL using Playwright.
     params:
         url: str - The URL of the article to fetch       
@@ -14,12 +14,11 @@ async def fetch_with_browser(url, browser) -> str | None:
     """
     page = None
     try:
-        page = await browser.new_page()
+        page = await context.new_page()
         await page.goto(url, wait_until="domcontentloaded")
         return await page.content()
     except Exception as e:
         raise Exception("Failed to fetch with browser", e)
-        return None
     finally:
         if page is not None:
             page.close()
@@ -33,11 +32,9 @@ async def fetch_article(url, client, browser) -> str | httpx._exceptions.HTTPErr
         match response.status_code:
             case 200:
                 return response.text
-            case status if 200 < status < 400 and browser is not None:
+            case status if status in(400, 401, 403) and browser:
                 html_content = await fetch_with_browser(url, browser)
                 return html_content
-            case None:
-                raise ValueError("Response is None.")
             case _:
                 raise httpx._exceptions.HTTPError(f"X --{response.status_code} {url}")
     except Exception as e:

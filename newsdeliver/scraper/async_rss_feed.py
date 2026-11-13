@@ -48,22 +48,24 @@ def stream_parse_rss_feed(response) -> Generator[str, None, None]:
             raise Exception("Error", e)
 
 
-async def decode_rss_links(url) -> str:
+async def decode_rss_links(url: list[str] | str) -> str | list[str]:
         """Decodes urls from Google RSS feed. Returns decoded url if successful, otherwise returns the original url.
         params:
             url: str - The url to decode
         returns:
             str - The decoded url or the original url if decoding fails
         """
-        decoded = await gnews_decoder_async(url)
-        if decoded['decoded_url']:
-            return decoded['decoded_url']
+        decoded: list[dict] = await gnews_decoder_async(url)
+        print(decoded) # Returns dict, or list dict when url is a list
+        if isinstance(decoded, dict):
+            if decoded.get('decoded_url'):
+                return decoded.get('decoded_url')
+        
+        if isinstance(decoded, list):
+            return [d.get('decoded_url') for d in decoded if d.get('success') == True]
+            
 
-        return url
-
-
-
-async def rss_worker_async(client, url: str) -> list[str] | None:
+async def rss_worker_async(client, url: str) -> list[str]:
     """Worker fetches and parses an rss feed, and returns article urls.
     params:
         url: str - The url of the rss feed
@@ -72,12 +74,12 @@ async def rss_worker_async(client, url: str) -> list[str] | None:
     """
     try:
         response = await client.get(url)
-        print(response)
-        rss_feed = await asyncio.to_thread(parse_rss_feed, response)
+        rss_feed: list[str] = await asyncio.to_thread(parse_rss_feed, response)
         
         if url.startswith("https://news.google.com/rss"):
-            decoded_url = await decode_rss_links(rss_feed)
+            decoded_urls = await decode_rss_links(rss_feed)
             return decoded_urls
+        
 
 
         return rss_feed
