@@ -1,11 +1,14 @@
-from .scraper import orchestrate_rss_workers, orchestrate_article_workers
 from queue import Queue
 from threading import Thread
-from .scraper import scrape_article_async, rss_worker_async
+from .async_page import scrape_article_async
+from .async_rss_feed import rss_worker_async
 import asyncio
 import httpx
 from playwright.async_api import async_playwright
 from dataclasses import dataclass
+
+
+
 
 @dataclass 
 class Counter:
@@ -13,7 +16,6 @@ class Counter:
 
     def increment(self):
         self.npages += 1
-
 
 
 async def feed_producer(client, feed, queue):
@@ -25,11 +27,11 @@ async def feed_producer(client, feed, queue):
         await queue.put(url)
 
 async def article_consumer(client, browser, queue, counter):
-    c = 0
     while True:
         url = await queue.get()
         try:
             result = await scrape_article_async(client, browser, url)
+            print(result)
             if isinstance(result, Exception):
                 raise Exception(result)
             
@@ -77,4 +79,3 @@ if __name__=="__main__":
         "https://www.cambridge-news.co.uk/?service=rss"
     ]
 
-    asyncio.run(main(feed_urls))
