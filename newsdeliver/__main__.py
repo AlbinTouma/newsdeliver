@@ -10,7 +10,6 @@ parser.add_argument("-url", type=str, dest="feed_urls", nargs="+")
 
 args = parser.parse_args()
 
-if __name__ == "__main__":
-    if args.feed_urls:
-        print(args.feed_urls)
-        asyncio.run(main(args.feed_urls))
+if args.feed_urls:
+    print(args.feed_urls)
+    asyncio.run(main(args.feed_urls))
