@@ -1,12 +1,12 @@
 from queue import Queue
+from dataclasses import dataclass
 from threading import Thread
 from .async_page import scrape_article_async
 from .async_rss_feed import rss_worker_async
 import asyncio
 import httpx
 from playwright.async_api import async_playwright
-from dataclasses import dataclass
-
+from newsdeliver.scraper.clients import async_httpx_client, async_playwright_browser
 
 
 
@@ -48,9 +48,10 @@ async def main(feed_urls, num_workers=4):
     queue = asyncio.Queue()
     counter = Counter(0)
 
-    async with httpx.AsyncClient() as client, async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
-        context = await browser.new_context()
+    async with (async_httpx_client() as client, async_playwright_browser() as browser): 
+        context = None
+        if browser:
+            context = await browser.new_context()
         try:
             workers = [
                 asyncio.create_task(article_consumer(client, context, queue, counter))
@@ -66,16 +67,4 @@ async def main(feed_urls, num_workers=4):
         finally:
             await browser.close()
 
-if __name__=="__main__":
-    import httpx
-
-    feed_urls = [
-
-        "https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q=Iran",
-        #"https://feeds.skynews.com/feeds/rss/uk.xml",
-        #"https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
-        #"https://feeds.bbci.co.uk/news/rss.xml"
-        #"https://www.gloucestershirelive.co.uk/?service=rss",
-        "https://www.cambridge-news.co.uk/?service=rss"
-    ]
 
