@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/AlbinTouma/newsdeliver/main/assets/Banner.jpg" alt="Newsdeliver jpg">
+  <img src="https://raw.githubusercontent.com/AlbinTouma/newsdeliver/main/assets/demo.gif" alt="Newsdeliver dmeo gif">
 </p>
 
 # Newsdeliver 
