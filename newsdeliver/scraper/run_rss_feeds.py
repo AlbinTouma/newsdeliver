@@ -63,7 +63,6 @@ async def main(feed_urls, num_workers=4):
             for w in workers:
                 w.cancel()
 
-            print(counter.npages)
         finally:
             await browser.close()
 
