@@ -7,7 +7,7 @@ import asyncio
 import httpx
 from playwright.async_api import async_playwright
 from newsdeliver.scraper.clients import async_httpx_client, async_playwright_browser
-
+import json
 
 
 @dataclass 
@@ -31,9 +31,11 @@ async def article_consumer(client, browser, queue, counter):
         url = await queue.get()
         try:
             result = await scrape_article_async(client, browser, url)
-            print(result)
             if isinstance(result, Exception):
                 raise Exception(result)
+
+            result_json = json.dumps(result, ensure_ascii=False)
+            print(result_json, flush=True)
             
             counter.increment()
             
@@ -64,6 +66,19 @@ async def main(feed_urls, num_workers=4):
                 w.cancel()
 
         finally:
+            await context.close()
+
+
+async def get_article(url: list[str], num_workers=4):
+    async with (async_httpx_client() as client, async_playwright_browser() as browser): 
+        context = None
+        if browser:
+            context = await browser.new_context()
+        try:
+            for u in url:
+                result = await scrape_article_async(client, context, u)
+                print(result)
+        except Exception as e:
+            raise Exception(e)
+        finally:
             await browser.close()
-
-
