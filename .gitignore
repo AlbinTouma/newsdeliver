@@ -5,3 +5,4 @@ dist/
 .notes.md
 *.txt
 *.sh
+*.jsonl
